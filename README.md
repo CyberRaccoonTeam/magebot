@@ -65,7 +65,16 @@ python console/magebotcli.py
 | `start_duel` | Begin a new duel against the AI |
 | `help` | Show available commands |
 | `about` | Game information |
-| `quit` | Exit the game |
+| `quit` / `exit` / `q` | Exit the game (also works during duels) |
+
+### Duel Commands
+
+| Command | Description |
+|---------|-------------|
+| Spell names (e.g., `Ignis`, `Glacies`) | Cast a spell (case-insensitive) |
+| `quit` / `exit` / `q` | Flee the duel and return to main menu |
+
+**Note:** Spell names are now **case-insensitive** - type `ignis`, `IGNIS`, or `Ignis` and they all work! If you make a typo, the game will suggest the correct spell name.
 
 ---
 

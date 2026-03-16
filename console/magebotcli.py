@@ -4,6 +4,7 @@
 # Import necessary modules
 import asyncio
 import random
+from difflib import get_close_matches
 from colorama import Fore, Style, init as colorama_init
 
 # Initialize Colorama for colored text in the terminal
@@ -219,12 +220,26 @@ async def duel_vs_magebot():
             player_effects["paralyzed"] = max(0, player_effects["paralyzed"] - 1)
             # Skip to mana regen
         else:
-            action = input("Your turn! Type a spell name: ").strip()
-            if action in all_spells:
-                spell = all_spells[action]
+            action = input("Enter your action (or 'quit' to exit): ").strip()
+            
+            # Empty input handling
+            if not action:
+                print(f"{Fore.YELLOW}Please enter a spell name or 'quit' to exit.{Style.RESET_ALL}")
+                continue
+            
+            # Quit command
+            if action.lower() in ['quit', 'exit', 'q']:
+                print(f"{Fore.YELLOW}You fled the duel!{Style.RESET_ALL}")
+                break
+            
+            # Case-insensitive matching
+            action_normalized = action.strip().title()
+            
+            if action_normalized in all_spells:
+                spell = all_spells[action_normalized]
                 mana_cost = spell.get("mana_cost", 0)
                 if player_mana < mana_cost:
-                    print(f"{Fore.RED}[Error] Not enough mana to cast {action}! Required mana: {mana_cost}, Current mana: {player_mana}{Style.RESET_ALL}")
+                    print(f"{Fore.RED}[Error] Not enough mana to cast {action_normalized}! Required mana: {mana_cost}, Current mana: {player_mana}{Style.RESET_ALL}")
                 else:
                     player_mana -= mana_cost
                     if "damage" in spell:
@@ -233,7 +248,7 @@ async def duel_vs_magebot():
                             print(f"{Fore.YELLOW}[Info] Enemy resistance broken! (RES:0){Style.RESET_ALL}")
                         dmg = max(0, spell["damage"] - magebot_res)
                         magebot_hp -= dmg
-                        print_action_log("You", action, spell, dmg, "MageBot")
+                        print_action_log("You", action_normalized, spell, dmg, "MageBot")
                         magebot_res = 0
                         # Apply effect if present
                         if "effect" in spell and random.random() < spell["chance"]:
@@ -244,12 +259,18 @@ async def duel_vs_magebot():
                         if player_hp > player_max_hp:
                             player_hp = player_max_hp
                             print(f"{Fore.GREEN}[Info] You have reached your maximum HP!{Style.RESET_ALL}")
-                        print_action_log("You", action, spell, spell["healing"], "You")
+                        print_action_log("You", action_normalized, spell, spell["healing"], "You")
                     elif "resistance_boost" in spell:
                         player_res += spell["resistance_boost"]
-                        print_action_log("You", action, spell, spell["resistance_boost"], "You")
+                        print_action_log("You", action_normalized, spell, spell["resistance_boost"], "You")
             else:
-                print(f"{Fore.RED}Unknown spell. Turn lost.{Style.RESET_ALL}")
+                # Spell suggestions on typo
+                suggestions = get_close_matches(action, all_spells.keys(), n=3, cutoff=0.6)
+                if suggestions:
+                    print(f"{Fore.RED}Unknown spell. Did you mean: {', '.join(suggestions)}?{Style.RESET_ALL}")
+                else:
+                    print(f"{Fore.RED}Unknown spell. Available spells: {', '.join(all_spells.keys())}{Style.RESET_ALL}")
+                continue  # Reprompt instead of losing turn
 
         # Player mana regeneration
         regen = 2
