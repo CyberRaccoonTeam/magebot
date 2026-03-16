@@ -15,9 +15,9 @@ MageBot is a turn-based magical duel game. Face an intelligent opponent that use
 │   ┌─────────────┐              ┌─────────────┐             │
 │   │   PLAYER    │              │   MAGEBOT   │             │
 │   │             │    ⚡⚔️⚡    │             │             │
-│   │  ❤️ HP: 20  │◄────────────►│  ❤️ HP: 20  │             │
+│   │  ❤️ HP: 10  │◄────────────►│  ❤️ HP: 10  │             │
 │   │  🛡️ RES: 0  │              │  🛡️ RES: 0  │             │
-│   │  💎 MANA: 25│              │  💎 MANA: 25│             │
+│   │  💎 MANA: 15│              │  💎 MANA: 15│             │
 │   └─────────────┘              └─────────────┘             │
 │                                                             │
 │   Available Spells:                                         │
@@ -25,7 +25,7 @@ MageBot is a turn-based magical duel game. Face an intelligent opponent that use
 │   ❄️ Glacies  - Ice damage, may freeze                     │
 │   ⚡ Fulmen   - Lightning damage, may paralyze             │
 │   🛡️ Fortitudo - Boost resistance                          │
-│   💚 Curatio  - Restore HP                                  │
+│   💚 Vitae    - Restore HP                                  │
 │                                                             │
 └─────────────────────────────────────────────────────────────┘
 ```
@@ -82,13 +82,15 @@ python console/magebotcli.py
 | Spell | Effect | Mana |
 |-------|--------|------|
 | **Fortitudo** 🛡️ | +3 Resistance | 2 |
-| **Praesidium** 🛡️ | +5 Resistance | 4 |
+| **Praesidium** 🛡️ | +2 Resistance | 1 |
+| **Tutela** 🛡️ | +1 Resistance | 1 |
 
 ### Healing Spells
 | Spell | Healing | Mana |
 |-------|---------|------|
-| **Curatio** 💚 | +4 HP | 3 |
-| **Sanatio** 💚 | +8 HP | 6 |
+| **Vitalis** 💚 | +6 HP | 4 |
+| **Vitae** 💚 | +4 HP | 3 |
+| **Sanare** 💚 | +2 HP | 1 |
 
 ---
 
