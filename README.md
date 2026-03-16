@@ -138,6 +138,8 @@ magebot/
 
 | Date | Version | Changes |
 |------|---------|---------|
+| **2026-03-16** | **1.2.0** | **✨ Input validation overhaul - case-insensitive spells, quit command, typo suggestions** |
+| **2026-03-16** | **1.1.8** | **🔧 Critical fixes - requirements.txt, MIT LICENSE, documentation accuracy** |
 | 2025-12-10 | 1.1.7 | Balanced Glacies spell |
 | 2025-12-10 | 1.1.6 | Added spell effects (freeze, paralyze, burn) |
 | 2025-12-10 | 1.1.4 | AI improvements, colored UI |
