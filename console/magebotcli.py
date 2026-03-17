@@ -12,7 +12,8 @@ from config.config import (
     MAX_HP, MAX_MANA, DEFAULT_MANA_REGEN, BURN_DAMAGE,
     DUEL_CONFIG, ATTACK_SPELLS, RESISTANCE_SPELLS, HEALING_SPELLS,
     MINIMAX_DEPTH, EVALUATION_WEIGHTS, VERSION, BANNER_WIDTH, MENU_WIDTH,
-    QUIT_COMMANDS, SPELL_MATCH_CUTOFF, SPELL_MATCH_LIMIT
+    QUIT_COMMANDS, SPELL_MATCH_CUTOFF, SPELL_MATCH_LIMIT,
+    SPELL_ALIASES, SPELL_SHORTCUTS, SPELL_HOTKEYS
 )
 
 # Initialize Colorama for colored text in the terminal
@@ -56,6 +57,43 @@ all_spells = {}
 all_spells.update(ATTACK_SPELLS)
 all_spells.update(RESISTANCE_SPELLS)
 all_spells.update(HEALING_SPELLS)
+
+
+def resolve_spell(user_input):
+    """
+    Resolve user input to a spell name using multiple methods.
+    Priority: exact match → aliases → shortcuts → hotkeys → fuzzy match
+    Returns the spell name (title case) or None if not found.
+    """
+    if not user_input:
+        return None
+    
+    # Normalize input
+    input_lower = user_input.strip().lower()
+    input_title = user_input.strip().title()
+    
+    # 1. Exact match (case-insensitive)
+    if input_title in all_spells:
+        return input_title
+    
+    # 2. Check aliases
+    if input_lower in SPELL_ALIASES:
+        return SPELL_ALIASES[input_lower]
+    
+    # 3. Check shortcuts (single letter)
+    if input_lower in SPELL_SHORTCUTS:
+        return SPELL_SHORTCUTS[input_lower]
+    
+    # 4. Check hotkeys (numbered 1-9)
+    if input_lower in SPELL_HOTKEYS:
+        return SPELL_HOTKEYS[input_lower]
+    
+    # 5. Fuzzy match as fallback
+    suggestions = get_close_matches(input_lower, all_spells.keys(), n=1, cutoff=SPELL_MATCH_CUTOFF)
+    if suggestions:
+        return suggestions[0]
+    
+    return None
 
 
 # Heuristic evaluation function for Minimax
@@ -165,18 +203,13 @@ async def activate_magebot_ai(): # Activates an LLM and not a simulation. (To be
 
 def print_spells_ui():
     print("\n=== Available Spells ===")
-    print("\n[Attack Spells]")
-    for name, spell in ATTACK_SPELLS.items():
-        effect_str = ""
-        if "effect" in spell:
-            effect_str = f" | Effect: {spell['effect']} ({spell['chance']*100:.0f}% chance, {spell['duration']} turn(s))"
-        print(f"  {name} : {spell['description']} (Damage : {spell['damage']}, Mana : {spell['mana_cost']}){effect_str}")
-    print("\n[Healing Spells]")
-    for name, spell in HEALING_SPELLS.items():
-        print(f"  {name} : {spell['description']} (Healing : {spell['healing']}, Mana : {spell['mana_cost']})")
-    print("\n[Resistance Spells]")
-    for name, spell in RESISTANCE_SPELLS.items():
-        print(f"  {name} : {spell['description']} (Resistance : +{spell['resistance_boost']}, Mana : {spell['mana_cost']})")
+    print("Enter spell name, alias, shortcut (letter), or hotkey (number)")
+    print("\n[1] Ignis (fire)       [4] Fortitudo (shield)   [7] Vitalis (big heal)")
+    print("[2] Glacies (ice)      [5] Praesidium (guard)   [8] Vitae (heal)")
+    print("[3] Fulmen (light)     [6] Tutela (protect)     [9] Sanare (quick heal)")
+    print("\nAliases: fire/flame/burn, ice/frost/freeze, light/lightning/thunder/shock,")
+    print("         strength/boost/resist, shield/guard/protect, ward/protection,")
+    print("         big heal/major heal, heal/healing, small heal/quick heal")
     print("========================\n")
 
 async def duel_vs_magebot():
@@ -229,14 +262,14 @@ async def duel_vs_magebot():
                 print(f"{Fore.YELLOW}You fled the duel!{Style.RESET_ALL}")
                 break
             
-            # Case-insensitive matching
-            action_normalized = action.strip().title()
+            # Resolve spell using multiple input methods
+            spell_name = resolve_spell(action)
             
-            if action_normalized in all_spells:
-                spell = all_spells[action_normalized]
+            if spell_name:
+                spell = all_spells[spell_name]
                 mana_cost = spell.get("mana_cost", 0)
                 if player_mana < mana_cost:
-                    print(f"{Fore.RED}[Error] Not enough mana to cast {action_normalized}! Required mana: {mana_cost}, Current mana: {player_mana}{Style.RESET_ALL}")
+                    print(f"{Fore.RED}[Error] Not enough mana to cast {spell_name}! Required mana: {mana_cost}, Current mana: {player_mana}{Style.RESET_ALL}")
                 else:
                     player_mana -= mana_cost
                     if "damage" in spell:
@@ -245,7 +278,7 @@ async def duel_vs_magebot():
                             print(f"{Fore.YELLOW}[Info] Enemy resistance broken! (RES:0){Style.RESET_ALL}")
                         dmg = max(0, spell["damage"] - magebot_res)
                         magebot_hp -= dmg
-                        print_action_log("You", action_normalized, spell, dmg, "MageBot")
+                        print_action_log("You", spell_name, spell, dmg, "MageBot")
                         magebot_res = 0
                         # Apply effect if present
                         if "effect" in spell and random.random() < spell["chance"]:
@@ -256,17 +289,13 @@ async def duel_vs_magebot():
                         if player_hp > player_max_hp:
                             player_hp = player_max_hp
                             print(f"{Fore.GREEN}[Info] You have reached your maximum HP!{Style.RESET_ALL}")
-                        print_action_log("You", action_normalized, spell, spell["healing"], "You")
+                        print_action_log("You", spell_name, spell, spell["healing"], "You")
                     elif "resistance_boost" in spell:
                         player_res += spell["resistance_boost"]
-                        print_action_log("You", action_normalized, spell, spell["resistance_boost"], "You")
+                        print_action_log("You", spell_name, spell, spell["resistance_boost"], "You")
             else:
-                # Spell suggestions on typo
-                suggestions = get_close_matches(action, all_spells.keys(), n=SPELL_MATCH_LIMIT, cutoff=SPELL_MATCH_CUTOFF)
-                if suggestions:
-                    print(f"{Fore.RED}Unknown spell. Did you mean: {', '.join(suggestions)}?{Style.RESET_ALL}")
-                else:
-                    print(f"{Fore.RED}Unknown spell. Available spells: {', '.join(all_spells.keys())}{Style.RESET_ALL}")
+                print(f"{Fore.RED}Unknown spell. Available spells: {', '.join(all_spells.keys())}{Style.RESET_ALL}")
+                print(f"{Fore.CYAN}Try using aliases (fire, ice, light), shortcuts (i, g, f), or hotkeys (1-9){Style.RESET_ALL}")
                 continue  # Reprompt instead of losing turn
 
         # Player mana regeneration

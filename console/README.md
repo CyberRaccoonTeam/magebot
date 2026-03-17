@@ -65,10 +65,41 @@ All game constants are now centralized in `config/config.py`:
 
 To customize gameplay, edit `config/config.py` instead of modifying game logic.
 
+## Controls
+
+### Spell Input Methods (v1.4.0+)
+
+You can cast spells using **four different methods**:
+
+**1. Hotkeys (Numbered 1-9)** - Fastest method:
+- `1` = Ignis, `2` = Glacies, `3` = Fulmen
+- `4` = Fortitudo, `5` = Praesidium, `6` = Tutela
+- `7` = Vitalis, `8` = Vitae, `9` = Sanare
+
+**2. Shortcuts (Single Letters)**:
+- `i` = Ignis, `g` = Glacies, `f` = Fulmen
+- `s` = Fortitudo, `p` = Praesidium, `t` = Tutela
+- `v` = Vitalis, `h` = Vitae, `a` = Sanare
+
+**3. Aliases (Common Names)**:
+- Fire spells: `fire`, `flame`, `burn` → Ignis
+- Ice spells: `ice`, `frost`, `freeze` → Glacies
+- Lightning: `light`, `lightning`, `thunder`, `shock` → Fulmen
+- Resistance: `strength`, `boost`, `resist` → Fortitudo
+- Shields: `shield`, `guard`, `protect` → Praesidium
+- Protection: `ward`, `protection` → Tutela
+- Healing: `big heal`, `major heal` → Vitalis | `heal`, `healing` → Vitae | `small heal`, `quick heal` → Sanare
+
+**4. Exact Spell Names**: Type the full Latin name (case-insensitive): `Ignis`, `Glacies`, `Fulmen`, etc.
+
+### Resolution Priority
+The game checks input in this order: **Exact match → Aliases → Shortcuts → Hotkeys → Fuzzy match**
+
 ## Changelog
 
 | Date       | Version | New Features / Modifications | Type de program |
 |------------|---------|------------------------------|-----------------|
+| 2026-03-17 | 1.4.0   | **Multiple spell input methods**: Added hotkeys (1-9), shortcuts (single letters), and aliases (common names). New `resolve_spell()` function with priority-based resolution. Updated UI shows numbered spell list. Faster, more intuitive spell casting. | Console |
 | 2026-03-17 | 1.3.0   | **Configuration optimization**: Centralized all game constants into `config/config.py`. Moved spell definitions, duel stats, AI parameters, and UI settings. Improved code maintainability and balance tuning. | Console |
 | 2026-03-16 | 1.2.0   | Input validation overhaul: Empty input reprompts, quit commands (quit/exit/q), case-insensitive spell matching, typo suggestions with fuzzy matching. Turn not lost on invalid input. | Console |
 | 2026-03-16 | 1.1.8   | Critical documentation fixes: Updated README with accurate version history and feature descriptions. | Console |

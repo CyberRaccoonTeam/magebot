@@ -113,3 +113,58 @@ EFFECT_NAMES = {
 # === Match Configuration ===
 SPELL_MATCH_CUTOFF = 0.6
 SPELL_MATCH_LIMIT = 3
+
+# === Spell Input Methods ===
+# Aliases: common names → spell names
+SPELL_ALIASES = {
+    "fire": "Ignis",
+    "flame": "Ignis",
+    "burn": "Ignis",
+    "ice": "Glacies",
+    "frost": "Glacies",
+    "freeze": "Glacies",
+    "light": "Fulmen",
+    "lightning": "Fulmen",
+    "thunder": "Fulmen",
+    "shock": "Fulmen",
+    "strength": "Fortitudo",
+    "boost": "Fortitudo",
+    "resist": "Fortitudo",
+    "shield": "Praesidium",
+    "guard": "Praesidium",
+    "protect": "Praesidium",
+    "ward": "Tutela",
+    "protection": "Tutela",
+    "big heal": "Vitalis",
+    "major heal": "Vitalis",
+    "heal": "Vitae",
+    "healing": "Vitae",
+    "small heal": "Sanare",
+    "quick heal": "Sanare",
+}
+
+# Shortcuts: single-letter → spell names
+SPELL_SHORTCUTS = {
+    "i": "Ignis",
+    "g": "Glacies",
+    "f": "Fulmen",
+    "s": "Fortitudo",
+    "p": "Praesidium",
+    "t": "Tutela",
+    "v": "Vitalis",
+    "h": "Vitae",
+    "a": "Sanare",
+}
+
+# Hotkeys: numbered (1-9) → spell names
+SPELL_HOTKEYS = {
+    "1": "Ignis",
+    "2": "Glacies",
+    "3": "Fulmen",
+    "4": "Fortitudo",
+    "5": "Praesidium",
+    "6": "Tutela",
+    "7": "Vitalis",
+    "8": "Vitae",
+    "9": "Sanare",
+}
