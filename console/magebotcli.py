@@ -7,13 +7,16 @@ import random
 from difflib import get_close_matches
 from colorama import Fore, Style, init as colorama_init
 
+# Import centralized configuration
+from config.config import (
+    MAX_HP, MAX_MANA, DEFAULT_MANA_REGEN, BURN_DAMAGE,
+    DUEL_CONFIG, ATTACK_SPELLS, RESISTANCE_SPELLS, HEALING_SPELLS,
+    MINIMAX_DEPTH, EVALUATION_WEIGHTS, VERSION, BANNER_WIDTH, MENU_WIDTH,
+    QUIT_COMMANDS, SPELL_MATCH_CUTOFF, SPELL_MATCH_LIMIT
+)
+
 # Initialize Colorama for colored text in the terminal
 colorama_init(autoreset=True)
-
-# Valeurs globales (utilisées par l'heuristique)
-MAX_HP = 20
-MAX_MANA = 25
-
 
 # ---- Gestion des fonctions du jeu ----
 
@@ -34,6 +37,7 @@ def print_duel_state(player_hp, player_res, player_mana, magebot_hp, magebot_res
             effects_str += f" | Effects: {', '.join(active_effects)}"
     print(f"{Fore.MAGENTA}MageBot  : {magebot_hp} HP | Resistance : {magebot_res} | Mana : {magebot_mana}{effects_str}{Style.RESET_ALL}")
     print(f"{Fore.YELLOW}---------------------{Style.RESET_ALL}\n")
+
 # Log actions during the duel
 def print_action_log(actor, spell_name, spell, effect_value, target):
     if "damage" in spell:
@@ -47,27 +51,21 @@ def print_action_log(actor, spell_name, spell, effect_value, target):
         print(f"{ascii} {actor} casts {spell_name} (Resistance) : {Fore.CYAN}Magical resistance +{effect_value} this turn.{Style.RESET_ALL}")
 
 
-# Dictionary of spells in Latin (attack, healing, resistance)
-attack_spells = {
-    "Ignis": {"description": "Deals fire damage and may burn the enemy.", "damage": 3, "mana_cost": 3, "effect": "burn", "duration": 2, "chance": 0.6},
-    "Glacies": {"description": "Deals ice damage and may freeze the enemy.", "damage": 4, "mana_cost": 2, "effect": "freeze", "duration": 1, "chance": 0.3},
-    "Fulmen": {"description": "Deals lightning damage and may paralyze the enemy.", "damage": 2, "mana_cost": 2, "effect": "paralyze", "duration": 1, "chance": 0.4},
-}
-resistance_spells = {
-    "Fortitudo": {"description": "Increases the caster's magical resistance.", "resistance_boost": 3, "mana_cost": 2},
-    "Praesidium": {"description": "Temporary magical shield.", "resistance_boost": 2, "mana_cost": 1},
-    "Tutela": {"description": "Light magical protection.", "resistance_boost": 1, "mana_cost": 1},
-}
-healing_spells = {
-    "Vitalis": {"description": "Heals the caster's wounds.", "healing": 6, "mana_cost": 4},
-    "Vitae": {"description": "Restores some of the caster's health.", "healing": 4, "mana_cost": 3},
-    "Sanare": {"description": "Light healing.", "healing": 2, "mana_cost": 1},
-}
+# Merge all spells into a single dictionary (imported from config)
+all_spells = {}
+all_spells.update(ATTACK_SPELLS)
+all_spells.update(RESISTANCE_SPELLS)
+all_spells.update(HEALING_SPELLS)
 
 
 # Heuristic evaluation function for Minimax
 def evaluate_state(player_hp, player_res, player_mana, magebot_hp, magebot_res, magebot_mana,
-                   w_hp=1.0, w_res=0.5, w_mana=0.4):
+                   w_hp=None, w_res=None, w_mana=None):
+    # Use config weights if not specified
+    if w_hp is None: w_hp = EVALUATION_WEIGHTS["hp"]
+    if w_res is None: w_res = EVALUATION_WEIGHTS["resistance"]
+    if w_mana is None: w_mana = EVALUATION_WEIGHTS["mana"]
+    
     # Positive score favors MageBot
     hp_score = (magebot_hp - player_hp) * w_hp
     res_score = (magebot_res - player_res) * w_res
@@ -124,6 +122,7 @@ def minimax(player_hp, player_res, player_mana, magebot_hp, magebot_res, magebot
                 eval = evaluate_state(player_hp, player_res, player_mana, magebot_hp, magebot_res, magebot_mana)
             min_eval = min(min_eval, eval)
         return min_eval
+
 # Spell choice by MageBot using Minimax
 def magebot_choose_spell(player_hp, player_res, player_mana, magebot_hp, magebot_res, magebot_mana, magebot_max_hp, possible_spells):
     best_score = -float('inf')
@@ -146,13 +145,13 @@ def magebot_choose_spell(player_hp, player_res, player_mana, magebot_hp, magebot
             continue
         if "damage" in spell:
             dmg = max(0, spell["damage"] - player_res)
-            score = minimax(player_hp - dmg, 0, player_mana, magebot_hp, magebot_res, magebot_mana - cost, 2, False)
+            score = minimax(player_hp - dmg, 0, player_mana, magebot_hp, magebot_res, magebot_mana - cost, MINIMAX_DEPTH, False)
         elif "healing" in spell:
             new_hp = min(MAX_HP, magebot_hp + spell["healing"])
-            score = minimax(player_hp, player_res, player_mana, new_hp, magebot_res, magebot_mana - cost, 2, False)
+            score = minimax(player_hp, player_res, player_mana, new_hp, magebot_res, magebot_mana - cost, MINIMAX_DEPTH, False)
         elif "resistance_boost" in spell:
             new_res = magebot_res + spell["resistance_boost"]
-            score = minimax(player_hp, player_res, player_mana, magebot_hp, new_res, magebot_mana - cost, 2, False)
+            score = minimax(player_hp, player_res, player_mana, magebot_hp, new_res, magebot_mana - cost, MINIMAX_DEPTH, False)
         else:
             score = evaluate_state(player_hp, player_res, player_mana, magebot_hp, magebot_res, magebot_mana)
         if score > best_score:
@@ -164,41 +163,39 @@ async def activate_magebot_ai(): # Activates an LLM and not a simulation. (To be
     print("MageBot AI: activated.")
     await asyncio.sleep(1)  # Simulate an asynchronous operation
 
-# Merge all spells into a single dictionary
-all_spells = {}
-all_spells.update(attack_spells)
-all_spells.update(resistance_spells)
-all_spells.update(healing_spells)
-
 def print_spells_ui():
     print("\n=== Available Spells ===")
     print("\n[Attack Spells]")
-    for name, spell in attack_spells.items():
+    for name, spell in ATTACK_SPELLS.items():
         effect_str = ""
         if "effect" in spell:
             effect_str = f" | Effect: {spell['effect']} ({spell['chance']*100:.0f}% chance, {spell['duration']} turn(s))"
         print(f"  {name} : {spell['description']} (Damage : {spell['damage']}, Mana : {spell['mana_cost']}){effect_str}")
     print("\n[Healing Spells]")
-    for name, spell in healing_spells.items():
+    for name, spell in HEALING_SPELLS.items():
         print(f"  {name} : {spell['description']} (Healing : {spell['healing']}, Mana : {spell['mana_cost']})")
     print("\n[Resistance Spells]")
-    for name, spell in resistance_spells.items():
+    for name, spell in RESISTANCE_SPELLS.items():
         print(f"  {name} : {spell['description']} (Resistance : +{spell['resistance_boost']}, Mana : {spell['mana_cost']})")
     print("========================\n")
 
 async def duel_vs_magebot():
     await activate_magebot_ai()
     print("The duel begins!")
-    player_hp = 10
-    player_res = 5
-    player_mana = 15
-    player_max_hp = 20
-    player_max_mana = 25
-    magebot_hp = 10
-    magebot_res = 5
-    magebot_mana = 15
-    magebot_max_hp = 20
-    magebot_max_mana = 25
+    
+    # Load default duel config
+    player_hp = DUEL_CONFIG["player"]["hp"]
+    player_res = DUEL_CONFIG["player"]["resistance"]
+    player_mana = DUEL_CONFIG["player"]["mana"]
+    player_max_hp = DUEL_CONFIG["player"]["max_hp"]
+    player_max_mana = DUEL_CONFIG["player"]["max_mana"]
+    
+    magebot_hp = DUEL_CONFIG["magebot"]["hp"]
+    magebot_res = DUEL_CONFIG["magebot"]["resistance"]
+    magebot_mana = DUEL_CONFIG["magebot"]["mana"]
+    magebot_max_hp = DUEL_CONFIG["magebot"]["max_hp"]
+    magebot_max_mana = DUEL_CONFIG["magebot"]["max_mana"]
+    
     player_effects = {"frozen": 0, "paralyzed": 0, "burned": 0}
     magebot_effects = {"frozen": 0, "paralyzed": 0, "burned": 0}
 
@@ -209,7 +206,7 @@ async def duel_vs_magebot():
 
         # Apply player effects
         if player_effects["burned"] > 0:
-            burn_damage = 1
+            burn_damage = BURN_DAMAGE
             player_hp -= burn_damage
             print(f"{Fore.RED}[Burn] You take {burn_damage} burn damage!{Style.RESET_ALL}")
             player_effects["burned"] -= 1
@@ -228,7 +225,7 @@ async def duel_vs_magebot():
                 continue
             
             # Quit command
-            if action.lower() in ['quit', 'exit', 'q']:
+            if action.lower() in QUIT_COMMANDS:
                 print(f"{Fore.YELLOW}You fled the duel!{Style.RESET_ALL}")
                 break
             
@@ -265,7 +262,7 @@ async def duel_vs_magebot():
                         print_action_log("You", action_normalized, spell, spell["resistance_boost"], "You")
             else:
                 # Spell suggestions on typo
-                suggestions = get_close_matches(action, all_spells.keys(), n=3, cutoff=0.6)
+                suggestions = get_close_matches(action, all_spells.keys(), n=SPELL_MATCH_LIMIT, cutoff=SPELL_MATCH_CUTOFF)
                 if suggestions:
                     print(f"{Fore.RED}Unknown spell. Did you mean: {', '.join(suggestions)}?{Style.RESET_ALL}")
                 else:
@@ -273,7 +270,7 @@ async def duel_vs_magebot():
                 continue  # Reprompt instead of losing turn
 
         # Player mana regeneration
-        regen = 2
+        regen = DEFAULT_MANA_REGEN
         if player_mana < player_max_mana:
             player_mana += regen
             if player_mana > player_max_mana:
@@ -291,7 +288,7 @@ async def duel_vs_magebot():
 
         # Apply magebot effects
         if magebot_effects["burned"] > 0:
-            burn_damage = 1
+            burn_damage = BURN_DAMAGE
             magebot_hp -= burn_damage
             print(f"{Fore.RED}[Burn] MageBot takes {burn_damage} burn damage!{Style.RESET_ALL}")
             magebot_effects["burned"] -= 1
@@ -306,10 +303,10 @@ async def duel_vs_magebot():
             magebot_possible_spells = [name for name, s in all_spells.items() if s.get("mana_cost", 0) <= magebot_mana]
             if not magebot_possible_spells:
                 print(f"{Fore.MAGENTA}MageBot doesn't have enough mana to cast a spell! It passes its turn...{Style.RESET_ALL}")
-                magebot_mana += 2
+                magebot_mana += DEFAULT_MANA_REGEN
                 if magebot_mana > magebot_max_mana:
                     magebot_mana = magebot_max_mana
-                print(f"{Fore.MAGENTA}[Mana] MageBot recovers 2 mana. (Mana: {magebot_mana}/{magebot_max_mana}){Style.RESET_ALL}")
+                print(f"{Fore.MAGENTA}[Mana] MageBot recovers {DEFAULT_MANA_REGEN} mana. (Mana: {magebot_mana}/{magebot_max_mana}){Style.RESET_ALL}")
             else:
                 magebot_action = magebot_choose_spell(player_hp, player_res, player_mana, magebot_hp, magebot_res, magebot_mana, magebot_max_hp, magebot_possible_spells)
                 spell = all_spells[magebot_action]
@@ -341,10 +338,10 @@ async def duel_vs_magebot():
 
         # MageBot mana regeneration
         if magebot_mana < magebot_max_mana:
-            magebot_mana += regen
+            magebot_mana += DEFAULT_MANA_REGEN
             if magebot_mana > magebot_max_mana:
                 magebot_mana = magebot_max_mana
-            print(f"{Fore.MAGENTA}[Mana] MageBot recovers {regen} mana. (Mana: {magebot_mana}/{magebot_max_mana}){Style.RESET_ALL}")
+            print(f"{Fore.MAGENTA}[Mana] MageBot recovers {DEFAULT_MANA_REGEN} mana. (Mana: {magebot_mana}/{magebot_max_mana}){Style.RESET_ALL}")
 
         if player_hp <= 0:
             print_duel_state(player_hp, player_res, player_mana, magebot_hp, magebot_res, magebot_mana, player_effects, magebot_effects)
@@ -360,26 +357,26 @@ def main():
         print("\nClosing MageBot CLI.")
 
 async def init():
-    print(f"{Fore.CYAN}{'='*60}{Style.RESET_ALL}")
+    print(f"{Fore.CYAN}{'='*BANNER_WIDTH}{Style.RESET_ALL}")
     print(f"{Fore.CYAN}███╗   ███╗ █████╗  ██████╗ ███████╗    ██████╗  ██████╗ ████████╗{Style.RESET_ALL}")
     print(f"{Fore.CYAN}████╗ ████║██╔══██╗██╔════╝ ██╔════╝    ██╔══██╗██╔═══██╗╚══██╔══╝{Style.RESET_ALL}")
     print(f"{Fore.CYAN}██╔████╔██║███████║██║  ███╗█████╗      ██████╔╝██║   ██║   ██║   {Style.RESET_ALL}")
     print(f"{Fore.CYAN}██║╚██╔╝██║██╔══██║██║   ██║██╔══╝      ██╔══██╗██║   ██║   ██║   {Style.RESET_ALL}")
-    print(f"{Fore.CYAN}██║ ╚═╝ ██║██║  ██║╚██████╔╝███████╗    ██████╔╝╚██████╔╝   ██║   {Style.RESET_ALL}")
+    print(f"{Fore.CYAN}██║╚██╔╝██║██║  ██║╚██████╔╝███████╗    ██████╔╝╚██████╔╝   ██║   {Style.RESET_ALL}")
     print(f"{Fore.CYAN}╚═╝     ╚═╝╚═╝  ╚═╝ ╚═════╝ ╚══════╝    ╚═════╝  ╚═════╝    ╚═╝   {Style.RESET_ALL}")
-    print(f"{Fore.CYAN}{'='*60}{Style.RESET_ALL}")
+    print(f"{Fore.CYAN}{'='*BANNER_WIDTH}{Style.RESET_ALL}")
     print(f"{Fore.CYAN}Welcome to MageBot CLI{Style.RESET_ALL}")
     print("Type 'help' to see available commands.")
-    print(f'Version: 1.1.7')
+    print(f'Version: {VERSION}')
     while True:
-        print(f"{Fore.YELLOW}{'='*40}{Style.RESET_ALL}")
+        print(f"{Fore.YELLOW}{'='*MENU_WIDTH}{Style.RESET_ALL}")
         print(f"{Fore.CYAN}MageBot CLI - Main Menu{Style.RESET_ALL}")
-        print(f"{Fore.YELLOW}{'='*40}{Style.RESET_ALL}")
+        print(f"{Fore.YELLOW}{'='*MENU_WIDTH}{Style.RESET_ALL}")
         print(f"{Fore.GREEN}1.{Style.RESET_ALL} Help")
         print(f"{Fore.GREEN}2.{Style.RESET_ALL} About")
         print(f"{Fore.GREEN}3.{Style.RESET_ALL} Start Duel")
         print(f"{Fore.GREEN}4.{Style.RESET_ALL} Exit")
-        print(f"{Fore.YELLOW}{'-'*40}{Style.RESET_ALL}")
+        print(f"{Fore.YELLOW}{'-'*MENU_WIDTH}{Style.RESET_ALL}")
         command = input(f"{Fore.CYAN}Select an option (1-4): {Style.RESET_ALL}").strip()
         if command == "1" or command.lower() == "help":
             print(f"{Fore.YELLOW}Available commands: help, about, start_dual, exit{Style.RESET_ALL}")

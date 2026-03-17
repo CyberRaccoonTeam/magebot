@@ -33,17 +33,45 @@ MageBot is a magical duel game inspired by the Harry Potter universe, where you 
 
 - **Console Version** (recommended, most advanced) :
   ```bash
-  python MageBot/console_version/magebotcli.py
+  cd console
+  python3 magebotcli.py
   ```
   Type `help` for available commands, `start_dual` to start a duel against the AI.
 
 - **Discord Version** : (Upcoming) Add the bot to your server and use commands.
 - **Web Version** : (Upcoming) Open in a browser.
 
+## Project Structure
+
+```
+magebot/
+├── console/
+│   ├── magebotcli.py      # Main game logic
+│   ├── config/
+│   │   ├── __init__.py    # Config package init
+│   │   └── config.py      # Centralized game configuration
+│   └── README.md          # This file
+├── requirements.txt
+└── LICENSE
+```
+
+## Configuration
+
+All game constants are now centralized in `config/config.py`:
+- Game balance (HP, mana, damage values)
+- Spell definitions
+- AI parameters (Minimax depth, evaluation weights)
+- UI settings (version, display widths)
+
+To customize gameplay, edit `config/config.py` instead of modifying game logic.
+
 ## Changelog
 
 | Date       | Version | New Features / Modifications | Type de program |
 |------------|---------|------------------------------|-----------------|
+| 2026-03-17 | 1.3.0   | **Configuration optimization**: Centralized all game constants into `config/config.py`. Moved spell definitions, duel stats, AI parameters, and UI settings. Improved code maintainability and balance tuning. | Console |
+| 2026-03-16 | 1.2.0   | Input validation overhaul: Empty input reprompts, quit commands (quit/exit/q), case-insensitive spell matching, typo suggestions with fuzzy matching. Turn not lost on invalid input. | Console |
+| 2026-03-16 | 1.1.8   | Critical documentation fixes: Updated README with accurate version history and feature descriptions. | Console |
 | 2025-12-10 | 1.1.7   | Balanced Glacies spell: reduced freeze chance to 30%, increased damage to 4 for better gameplay variety | Console |
 | 2025-12-10 | 1.1.6   | Added spell effects (freeze, paralyze, burn) with chances, adjusted spell values for better balance, updated duel state display to show active effects | Console |
 | 2025-12-10 | 1.1.4   | AI improvements (mana/resistance in heuristic, avoid healing at max HP), colored startup UI, added 'about' command, console version is the most advanced | Console |
