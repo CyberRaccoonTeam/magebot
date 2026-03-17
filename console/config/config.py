@@ -98,7 +98,7 @@ EVALUATION_WEIGHTS = {
 }
 
 # === UI Configuration ===
-VERSION = "1.3.0"
+VERSION = "1.4.1"
 BANNER_WIDTH = 60
 MENU_WIDTH = 40
 QUIT_COMMANDS = ['quit', 'exit', 'q']
@@ -115,7 +115,7 @@ SPELL_MATCH_CUTOFF = 0.6
 SPELL_MATCH_LIMIT = 3
 
 # === Spell Input Methods ===
-# Aliases: common names → spell names
+# Aliases: common names → spell names (intuitive, easy to remember)
 SPELL_ALIASES = {
     "fire": "Ignis",
     "flame": "Ignis",
@@ -143,21 +143,19 @@ SPELL_ALIASES = {
     "quick heal": "Sanare",
 }
 
-# Shortcuts: single-letter → spell names
-SPELL_SHORTCUTS = {
-    "i": "Ignis",
-    "g": "Glacies",
-    "f": "Fulmen",
-    "s": "Fortitudo",
-    "p": "Praesidium",
-    "t": "Tutela",
-    "v": "Vitalis",
-    "h": "Vitae",
-    "a": "Sanare",
-}
-
-# Hotkeys: numbered (1-9) → spell names
+# Hotkeys: numbered (1-9) → spell names (fastest input method)
 SPELL_HOTKEYS = {
+    "1": "Ignis",
+    "2": "Glacies",
+    "3": "Fulmen",
+    "4": "Fortitudo",
+    "5": "Praesidium",
+    "6": "Tutela",
+    "7": "Vitalis",
+    "8": "Vitae",
+    "9": "Sanare",
+}
+OTKEYS = {
     "1": "Ignis",
     "2": "Glacies",
     "3": "Fulmen",

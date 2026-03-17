@@ -67,21 +67,18 @@ To customize gameplay, edit `config/config.py` instead of modifying game logic.
 
 ## Controls
 
-### Spell Input Methods (v1.4.0+)
+### Spell Input Methods (v1.4.1+)
 
-You can cast spells using **four different methods**:
+Cast spells using **three intuitive methods**:
 
 **1. Hotkeys (Numbered 1-9)** - Fastest method:
-- `1` = Ignis, `2` = Glacies, `3` = Fulmen
-- `4` = Fortitudo, `5` = Praesidium, `6` = Tutela
-- `7` = Vitalis, `8` = Vitae, `9` = Sanare
+```
+[1] Ignis    [2] Glacies   [3] Fulmen
+[4] Fortitudo  [5] Praesidium  [6] Tutela
+[7] Vitalis  [8] Vitae     [9] Sanare
+```
 
-**2. Shortcuts (Single Letters)**:
-- `i` = Ignis, `g` = Glacies, `f` = Fulmen
-- `s` = Fortitudo, `p` = Praesidium, `t` = Tutela
-- `v` = Vitalis, `h` = Vitae, `a` = Sanare
-
-**3. Aliases (Common Names)**:
+**2. Aliases (Common Names)** - Most intuitive:
 - Fire spells: `fire`, `flame`, `burn` → Ignis
 - Ice spells: `ice`, `frost`, `freeze` → Glacies
 - Lightning: `light`, `lightning`, `thunder`, `shock` → Fulmen
@@ -90,15 +87,23 @@ You can cast spells using **four different methods**:
 - Protection: `ward`, `protection` → Tutela
 - Healing: `big heal`, `major heal` → Vitalis | `heal`, `healing` → Vitae | `small heal`, `quick heal` → Sanare
 
-**4. Exact Spell Names**: Type the full Latin name (case-insensitive): `Ignis`, `Glacies`, `Fulmen`, etc.
+**3. Exact Spell Names**: Type the full Latin name (case-insensitive): `Ignis`, `Glacies`, `Fulmen`, etc.
 
 ### Resolution Priority
-The game checks input in this order: **Exact match → Aliases → Shortcuts → Hotkeys → Fuzzy match**
+The game checks input in this order: **Exact match → Aliases → Hotkeys → Fuzzy match**
+
+### Rich UI Features (v1.4.1+)
+- 📊 Beautiful tables with colored columns
+- 🎨 Styled panels with borders
+- ⚡ Real-time effect indicators
+- 💎 Emoji-based stat display (❤️ HP, 🛡️ RES, 💎 MANA)
+- 🎯 Clean, professional terminal interface
 
 ## Changelog
 
 | Date       | Version | New Features / Modifications | Type de program |
 |------------|---------|------------------------------|-----------------|
+| 2026-03-17 | 1.4.1   | **✨ Rich UI overhaul + simplified input**: Replaced Colorama with Rich library for beautiful tables, panels, and styled output. Removed single-letter shortcuts (confusing). Kept hotkeys (1-9) and aliases (fire, ice, heal). Cleaner, more professional terminal UI. | Console |
 | 2026-03-17 | 1.4.0   | **Multiple spell input methods**: Added hotkeys (1-9), shortcuts (single letters), and aliases (common names). New `resolve_spell()` function with priority-based resolution. Updated UI shows numbered spell list. Faster, more intuitive spell casting. | Console |
 | 2026-03-17 | 1.3.0   | **Configuration optimization**: Centralized all game constants into `config/config.py`. Moved spell definitions, duel stats, AI parameters, and UI settings. Improved code maintainability and balance tuning. | Console |
 | 2026-03-16 | 1.2.0   | Input validation overhaul: Empty input reprompts, quit commands (quit/exit/q), case-insensitive spell matching, typo suggestions with fuzzy matching. Turn not lost on invalid input. | Console |
