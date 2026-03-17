@@ -117,11 +117,16 @@ MageBot uses a **Minimax algorithm** with heuristic evaluation:
 ```
 magebot/
 ├── console/
-│   ├── magebotcli.py    # Main CLI game
-│   └── README.md        # Console documentation
+│   ├── magebotcli.py          # Main CLI game
+│   ├── config/
+│   │   ├── __init__.py        # Config package init
+│   │   └── config.py          # Centralized game configuration
+│   └── README.md              # Console documentation
 ├── discord/
-│   └── readme.md        # Discord bot (upcoming)
-└── README.md            # This file
+│   └── readme.md              # Discord bot (upcoming)
+├── requirements.txt
+├── LICENSE
+└── README.md                  # This file
 ```
 
 ---
@@ -138,6 +143,7 @@ magebot/
 
 | Date | Version | Changes |
 |------|---------|---------|
+| **2026-03-17** | **1.3.0** | **🎯 Configuration optimization - Centralized all game constants into `config/config.py`. Moved spell definitions, duel stats, AI parameters, and UI settings. Improved code maintainability and balance tuning.** |
 | **2026-03-16** | **1.2.0** | **✨ Input validation overhaul - case-insensitive spells, quit command, typo suggestions** |
 | **2026-03-16** | **1.1.8** | **🔧 Critical fixes - requirements.txt, MIT LICENSE, documentation accuracy** |
 | 2025-12-10 | 1.1.7 | Balanced Glacies spell |
