@@ -146,7 +146,7 @@ magebot/
 
 | Date | Version | Changes |
 |------|---------|---------|
-| **2026-03-17** | **1.4.0** | **⚡ Multiple spell input methods - Added hotkeys (1-9), shortcuts (single letters), and aliases (common names). New `resolve_spell()` function with priority-based resolution. Updated UI shows numbered spell list for faster gameplay.** |
+| **2026-03-17** | **1.4.0** | **⚡ Multiple spell input methods - Added hotkeys (1-9), shortcuts (single letters), and aliases (common names). New `resolve_spell()` function with priority-based resolution. Updated UI shows numbered spell list for faster, more intuitive casting.** |
 | **2026-03-17** | **1.3.0** | **🎯 Configuration optimization - Centralized all game constants into `config/config.py`. Moved spell definitions, duel stats, AI parameters, and UI settings. Improved code maintainability and balance tuning.** |
 | **2026-03-16** | **1.2.0** | **✨ Input validation overhaul - case-insensitive spells, quit command, typo suggestions** |
 | **2026-03-16** | **1.1.8** | **🔧 Critical fixes - requirements.txt, MIT LICENSE, documentation accuracy** |
